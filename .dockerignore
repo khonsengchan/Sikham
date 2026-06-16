@@ -8,3 +8,4 @@ vendor
 *.log
 *.tmp
 *.sql
+!school_db.sql

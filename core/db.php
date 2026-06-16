@@ -1,5 +1,26 @@
 <?php
 // core/db.php - Database connection
+$databaseUrl = getenv('DATABASE_URL') ?: getenv('POSTGRES_URL') ?: '';
+$dbDriver = strtolower(getenv('DB_DRIVER') ?: '');
+
+if ($databaseUrl && (str_starts_with($databaseUrl, 'postgres://') || str_starts_with($databaseUrl, 'postgresql://'))) {
+    require_once __DIR__ . '/PgCompat.php';
+    $conn = PgCompatConnection::fromUrl($databaseUrl);
+    return;
+}
+
+if ($dbDriver === 'pgsql' || $dbDriver === 'postgres' || $dbDriver === 'postgresql') {
+    require_once __DIR__ . '/PgCompat.php';
+    $conn = PgCompatConnection::fromParts(
+        getenv('DB_HOST') ?: 'localhost',
+        (int) (getenv('DB_PORT') ?: 5432),
+        getenv('DB_NAME') ?: 'school_db',
+        getenv('DB_USER') ?: 'postgres',
+        getenv('DB_PASS') ?: ''
+    );
+    return;
+}
+
 $dbHost = getenv('DB_HOST') ?: 'localhost';
 $dbUser = getenv('DB_USER') ?: 'root';
 $dbPass = getenv('DB_PASS') ?: '';

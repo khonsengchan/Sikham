@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="lo">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ລະບົບບໍລິຫານໂຮງຮຽນ - School Management System</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=2026-06-12-2">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+  <!-- ============================================================ LOGIN PAGE ============================================================ -->
+  <div id="login-page" style="display:none;">
+
+    <!-- LEFT PANEL - Branding -->
+    <div class="login-left">
+      <!-- Animated BG Orbs -->
+      <div class="login-orb login-orb-1"></div>
+      <div class="login-orb login-orb-2"></div>
+      <div class="login-orb login-orb-3"></div>
+
+      <div class="login-left-content">
+        <div class="login-brand-logo">
+          <span>🏫</span>
+        </div>
+        <h1 class="login-brand-title">ລະບົບໂຮງຮຽນ</h1>
+        <p class="login-brand-sub">ອະນຸບານ ແລະ ປະຖົມ ນາໆຊາດ</p>
+
+        <div class="login-features">
+          <div class="login-feature-item">
+            <div class="login-feature-icon"><i class="fas fa-user-graduate"></i></div>
+            <div>
+              <div class="login-feature-title">ຈັດການນັກຮຽນ</div>
+              <div class="login-feature-desc">ລົງທະບຽນ ແລະ ຕິດຕາມຂໍ້ມູນ</div>
+            </div>
+          </div>
+          <div class="login-feature-item">
+            <div class="login-feature-icon"><i class="fas fa-clipboard-check"></i></div>
+            <div>
+              <div class="login-feature-title">ການເຂົ້າຮຽນ</div>
+              <div class="login-feature-desc">ບັນທຶກ ແລະ ລາຍງານຕົວຕ່ຳ</div>
+            </div>
+          </div>
+          <div class="login-feature-item">
+            <div class="login-feature-icon"><i class="fas fa-chart-bar"></i></div>
+            <div>
+              <div class="login-feature-title">ລາຍງານ & ສະຖິຕິ</div>
+              <div class="login-feature-desc">ວິເຄາະຂໍ້ມູນຢ່າງລະອຽດ</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-left-footer">© 2026 ລະບົບການຄຸ້ມຄອງໂຮງຮຽນປະຖົມ ເເລະ ອະນຸບານ</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL - Form -->
+    <div class="login-right">
+      <div class="login-card">
+        <div class="login-card-header">
+          <div class="login-card-icon"><i class="fas fa-lock"></i></div>
+          <h2>ຍິນດີຕ້ອນຮັບ</h2>
+          <p>ກະລຸນາເຂົ້າສູ່ລະບົບ ເພື່ອດຳເນີນການ</p>
+        </div>
+
+        <div class="login-error" id="login-error"></div>
+
+        <form id="login-form" autocomplete="off">
+          <!-- Username -->
+          <div class="login-input-group">
+            <div class="login-input-icon"><i class="fas fa-user"></i></div>
+            <input type="text" class="login-input" id="login-username" placeholder="ຊື່ຜູ້ໃຊ້" autocomplete="username"
+              required>
+          </div>
+
+          <!-- Password -->
+          <div class="login-input-group">
+            <div class="login-input-icon"><i class="fas fa-key"></i></div>
+            <input type="password" class="login-input" id="login-password" placeholder="ລະຫັດຜ່ານ"
+              autocomplete="current-password" required>
+            <button type="button" class="login-eye-btn" id="toggle-password" title="ສະແດງ/ເຊື່ອງລະຫັດ">
+              <i class="fas fa-eye" id="eye-icon"></i>
+            </button>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="login-submit-btn" id="login-submit-btn">
+            <span id="login-btn-text"><i class="fas fa-sign-in-alt"></i>&nbsp; ເຂົ້າສູ່ລະບົບ</span>
+            <span id="login-btn-loading" style="display:none;"><i class="fas fa-spinner fa-spin"></i>&nbsp;
+              ກຳລັງກວດສອບ...</span>
+          </button>
+        </form>
+
+        <div class="login-hint">
+          <!-- <i class="fas fa-info-circle"></i> -->
+          <!-- ໃຊ້ <strong>admin</strong> / <strong>password</strong> ເພື່ອທົດສອບ -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ MAIN APP ============================================================ -->
+  <div id="app" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+          <img id="sidebar-school-logo" src="assets/images/school_logo.png" alt="School Logo" style="width:42px;height:42px;object-fit:cover;border-radius:10px;">
+        </div>
+        <div class="sidebar-brand-text">
+          <h2 id="sidebar-school-name">ໂຮງຮຽນ ສີຄຳ ພັດທະນາ</h2>
+          <p id="sidebar-school-sub">SIKHAM PHATTHANA SCHOOL</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">ຫຼັກ</div>
+        <a class="nav-item" data-page="dashboard" onclick="navigateTo('dashboard')"> <span class="nav-icon"><i
+              class="fas fa-th-large"></i></span> <span class="nav-text">ໜ້າຫຼັກ</span></a>
+        <a class="nav-item" data-page="students" onclick="navigateTo('students')"> <span class="nav-icon"><i
+              class="fas fa-user-graduate"></i></span> <span class="nav-text">ນັກຮຽນ</span></a>
+        <a class="nav-item" data-page="staff" onclick="navigateTo('staff')"> <span class="nav-icon"><i
+              class="fas fa-chalkboard-teacher"></i></span> <span class="nav-text">ຄູ ແລະ ພະນັກງານ</span></a>
+        <a class="nav-item" data-page="classes" onclick="navigateTo('classes')"> <span class="nav-icon"><i
+              class="fas fa-door-open"></i></span> <span class="nav-text">ຫ້ອງຮຽນ</span></a>
+        <a class="nav-item" data-page="schedule" onclick="navigateTo('schedule')"> <span class="nav-icon"><i
+              class="fas fa-calendar-alt"></i></span> <span class="nav-text">ຕາລາງຮຽນ</span></a>
+        <a class="nav-item" data-page="attendance" onclick="navigateTo('attendance')"> <span class="nav-icon"><i
+              class="fas fa-clipboard-check"></i></span> <span class="nav-text">ການເຂົ້າຮຽນ</span></a>
+        <a class="nav-item" data-page="assessments" onclick="navigateTo('assessments')"> <span class="nav-icon"><i
+              class="fas fa-star-half-alt"></i></span> <span class="nav-text">ການປະເມີນ</span></a>
+
+        <div class="sidebar-section-label" style="margin-top:8px;">ບໍລິການ</div>
+        <a class="nav-item" data-page="finance" onclick="navigateTo('finance')"> <span class="nav-icon"><i
+              class="fas fa-wallet"></i></span> <span class="nav-text">ການເງິນ</span></a>
+        <a class="nav-item" data-page="transport" onclick="navigateTo('transport')"> <span class="nav-icon"><i
+              class="fas fa-bus"></i></span> <span class="nav-text">ລົດຮັບສົ່ງ</span></a>
+        <a class="nav-item" data-page="meals" onclick="navigateTo('meals')"> <span class="nav-icon"><i
+              class="fas fa-utensils"></i></span> <span class="nav-text">ອາຫານ</span></a>
+
+        <div class="sidebar-section-label" style="margin-top:8px;">ສຸຂະພາບ & ສື່ສານ</div>
+        <a class="nav-item" data-page="health" onclick="navigateTo('health')"> <span class="nav-icon"><i
+              class="fas fa-heartbeat"></i></span> <span class="nav-text">ສຸຂະພາບ</span></a>
+        <a class="nav-item" data-page="communication" onclick="navigateTo('communication')"><span class="nav-icon"><i
+              class="fas fa-bullhorn"></i></span> <span class="nav-text">ການສື່ສານ</span></a>
+        <a class="nav-item" data-page="calendar" onclick="navigateTo('calendar')"> <span class="nav-icon"><i
+              class="fas fa-calendar-alt"></i></span> <span class="nav-text">ປະຕິທິນ</span></a>
+
+        <div class="sidebar-section-label" style="margin-top:8px;">ລາຍງານ & ລະບົບ</div>
+        <a class="nav-item" data-page="inventory" onclick="navigateTo('inventory')"> <span class="nav-icon"><i
+              class="fas fa-boxes"></i></span> <span class="nav-text">ວັດຖຸ & ສາງ</span></a>
+        <a class="nav-item" data-page="reports" onclick="navigateTo('reports')"> <span class="nav-icon"><i
+              class="fas fa-chart-bar"></i></span> <span class="nav-text">ລາຍງານ</span></a>
+        <a class="nav-item" data-page="settings" onclick="navigateTo('settings')"> <span class="nav-icon"><i
+              class="fas fa-cog"></i></span> <span class="nav-text">ການຕັ້ງຄ່າ</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info" onclick="navigateTo('settings')">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-info-text">
+            <div class="user-name" id="user-name">Admin</div>
+            <div class="user-role" id="user-role">Administrator</div>
+          </div>
+          <i class="fas fa-cog" style="color:#64748b;margin-left:auto;" title="ການຕັ້ງຄ່າ"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button class="icon-btn" onclick="document.body.classList.toggle('sidebar-collapsed')"
+          style="margin-right:4px;border:none;background:transparent;font-size:20px;box-shadow:none;width:auto;height:auto;padding:0;color:var(--text-secondary)"
+          title="ເປີດ/ປິດ ເມນູ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="4" />
+            <path d="M9 3v18" />
+          </svg>
+        </button>
+        <div class="topbar-headings">
+          <!-- <h1 class="topbar-title" id="topbar-greeting">Welcome to CPS</h1> -->
+          <p class="topbar-title" id="topbar-day-greeting">ສະບາຍດີ </p>
+          <div class="topbar-meta-line">
+            <p class="topbar-subtitle" id="page-heading">ໜ້າຫຼັກ</p>
+            <span class="topbar-date-inline" id="topbar-date-inline"><i class="fas fa-calendar-day"></i> -</span>
+          </div>
+        </div>
+        <div class="search-bar">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="global-search" placeholder="ຄົ້ນຫາ..." oninput="onSearch(this.value)">
+        </div>
+        <div class="topbar-actions">
+
+          <div style="position:relative">
+            <button class="icon-btn" id="notif-btn" title="ການແຈ້ງເຕືອນ" onclick="toggleNotifications()">
+              <i class="fas fa-bell"></i>
+            </button>
+            <span id="notif-badge"
+              style="position:absolute;top:-4px;right:-4px;background:var(--accent-red);color:white;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;display:none">0</span>
+          </div>
+          <button class="topbar-user" title="ເບິ່ງໂປຣໄຟລ໌" onclick="navigateTo('settings')">
+            <div class="topbar-user-meta">
+              <span class="topbar-user-name" id="topbar-user-name">Admin</span>
+              <span class="topbar-user-role" id="topbar-user-role">Administrator</span>
+            </div>
+            <span class="topbar-user-avatar" id="topbar-user-avatar">A</span>
+          </button>
+          <button class="icon-btn danger" title="ອອກຈາກລະບົບ" onclick="handleLogout()"><i
+              class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </header>
+
+      <!-- NOTIFICATION PANEL -->
+      <div id="notif-panel"
+        style="display:none;position:fixed;top:68px;right:16px;z-index:500;width:360px;background:white;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+          <strong style="flex:1;font-size:14px">ການແຈ້ງເຕືອນ</strong>
+          <button class="btn btn-secondary btn-sm" onclick="markAllRead()">ອ່ານທັງໝົດ</button>
+        </div>
+        <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
+      </div>
+
+      <!-- PAGE CONTENT -->
+      <main id="page-content">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>ກຳລັງໂຫຼດ...</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+  <!-- MODAL CONTAINER -->
+  <div id="modal-container"></div>
+
+  <script src="assets/js/app.js?v=2026-06-12-7"></script>
+</body>
+
+</html>

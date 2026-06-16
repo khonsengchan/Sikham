@@ -1,0 +1,22 @@
+Array
+(
+    [school_name_lo] => ໂຮງຮຽນ ສີຄຳ ພັດທະນາ
+    [school_name_en] => SIKHAM PHATTHANA SCHOOL
+    [license] => EDU-2024-0120
+    [principal] => ທ່ານ ນາງ ພອນສີດາ
+    [phone] => 020 54561177
+    [email] => sikamphattana@school.la
+    [address] => ບ້ານ ໂພນຕ້ອງ ເມືອງ ໄຊທານີ ນະຄອນຫຼວງວຽງຈັນ, ລາວ
+    [vision] => ສ້າງເດັກທີ່ມີຄຸນນະພາບ, ມີຄວາມຮູ້ ແລະ ມີທັກສະ ທີ່ຈະພັດທະນາປະເທດຊາດໄປພ້ອມກັນ
+)
+Array
+(
+    [school_name_lo] => ໂຮງຮຽນ ສີຄຳ ພັດທະນາ
+    [school_name_en] => SIKHAM PHATTHANA SCHOOL
+    [license] => EDU-2024-0120
+    [principal] => ທ່ານ ນາງ ພອນສີດາ
+    [phone] => 020 54561177
+    [email] => sikamphattana@school.la
+    [address] => ບ້ານ ໂພນຕ້ອງ ເມືອງ ໄຊທານີ ນະຄອນຫຼວງວຽງຈັນ, ລາວ
+    [vision] => ສ້າງເດັກທີ່ມີຄຸນນະພາບ, ມີຄວາມຮູ້ ແລະ ມີທັກສະ ທີ່ຈະພັດທະນາປະເທດຊາດໄປພ້ອມກັນ
+)

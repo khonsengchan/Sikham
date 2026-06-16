@@ -1,11 +1,12 @@
 <?php
 // core/db.php - Database connection
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'school_db');
+$dbHost = getenv('DB_HOST') ?: 'localhost';
+$dbUser = getenv('DB_USER') ?: 'root';
+$dbPass = getenv('DB_PASS') ?: '';
+$dbName = getenv('DB_NAME') ?: 'school_db';
+$dbPort = (int) (getenv('DB_PORT') ?: 3306);
 
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+$conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName, $dbPort);
 if ($conn->connect_error) {
     http_response_code(500);
     die(json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]));

@@ -7,6 +7,12 @@ if (PHP_SAPI !== 'cli') {
 
 $ifEmpty = in_array('--if-empty', $argv, true);
 $dryRun = in_array('--dry-run', $argv, true);
+$outputFile = null;
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--output=')) {
+        $outputFile = substr($arg, 9);
+    }
+}
 $sqlFile = $argv[count($argv) - 1] ?? '';
 
 if (!$sqlFile || str_starts_with($sqlFile, '--') || !is_file($sqlFile)) {
@@ -32,6 +38,13 @@ if ($dryRun) {
     exit(0);
 }
 
+$convertedStatements = buildPostgresStatements($dump);
+if ($outputFile) {
+    file_put_contents($outputFile, implode(";\n\n", $convertedStatements) . ";\n");
+    fwrite(STDOUT, "Wrote PostgreSQL SQL to {$outputFile}.\n");
+    exit(0);
+}
+
 $pdo = connectPg();
 
 if ($ifEmpty && databaseHasTables($pdo)) {
@@ -42,38 +55,8 @@ if ($ifEmpty && databaseHasTables($pdo)) {
 $pdo->exec("SET client_encoding = 'UTF8'");
 $pdo->exec("SET standard_conforming_strings = off");
 
-$tables = extractTableNames($dump);
-dropTables($pdo, $tables);
-
-foreach (extractCreateStatements($dump) as $statement) {
-    execSql($pdo, convertCreateTable($statement));
-}
-
-foreach (extractInsertStatements($dump) as $statement) {
-    execSql($pdo, convertInsert($statement));
-}
-
-foreach (extractPrimaryKeys($dump) as $statement) {
+foreach ($convertedStatements as $statement) {
     execSql($pdo, $statement, true);
-}
-
-foreach (extractUniqueKeys($dump) as $statement) {
-    execSql($pdo, $statement, true);
-}
-
-foreach (extractAutoIncrements($dump) as $autoIncrement) {
-    [$table, $column, $nextValue] = $autoIncrement;
-    $sequence = "{$table}_{$column}_seq";
-    execSql($pdo, sprintf('CREATE SEQUENCE IF NOT EXISTS "%s"', $sequence), true);
-    execSql($pdo, sprintf('ALTER TABLE "%s" ALTER COLUMN "%s" SET DEFAULT nextval(' . "'%s'" . ')', $table, $column, $sequence), true);
-    execSql($pdo, sprintf('ALTER SEQUENCE "%s" OWNED BY "%s"."%s"', $sequence, $table, $column), true);
-    execSql($pdo, sprintf(
-        'SELECT setval(' . "'%s'" . ', GREATEST(COALESCE((SELECT MAX("%s") FROM "%s"), 0) + 1, %d), false)',
-        $sequence,
-        $column,
-        $table,
-        $nextValue
-    ), true);
 }
 
 fwrite(STDOUT, "PostgreSQL import completed.\n");
@@ -135,6 +118,53 @@ function dropTables(PDO $pdo, array $tables): void
     $pdo->exec('DROP TABLE IF EXISTS ' . implode(', ', $quoted) . ' CASCADE');
 }
 
+function buildPostgresStatements(string $dump): array
+{
+    $statements = [
+        "SET client_encoding = 'UTF8'",
+        'SET standard_conforming_strings = off',
+    ];
+    $tables = extractTableNames($dump);
+
+    if ($tables) {
+        $quoted = array_map(fn($table) => '"' . str_replace('"', '""', $table) . '"', $tables);
+        $statements[] = 'DROP TABLE IF EXISTS ' . implode(', ', $quoted) . ' CASCADE';
+    }
+
+    foreach (extractCreateStatements($dump) as $statement) {
+        $statements[] = convertCreateTable($statement);
+    }
+
+    foreach (extractInsertStatements($dump) as $statement) {
+        $statements[] = convertInsert($statement);
+    }
+
+    foreach (extractPrimaryKeys($dump) as $statement) {
+        $statements[] = $statement;
+    }
+
+    foreach (extractUniqueKeys($dump) as $statement) {
+        $statements[] = $statement;
+    }
+
+    foreach (extractAutoIncrements($dump) as $autoIncrement) {
+        [$table, $column, $nextValue] = $autoIncrement;
+        $sequence = "{$table}_{$column}_seq";
+        $statements[] = sprintf('CREATE SEQUENCE IF NOT EXISTS "%s"', $sequence);
+        $statements[] = sprintf('ALTER TABLE "%s" ALTER COLUMN "%s" SET DEFAULT nextval(' . "'%s'" . ')', $table, $column, $sequence);
+        $statements[] = sprintf('ALTER SEQUENCE "%s" OWNED BY "%s"."%s"', $sequence, $table, $column);
+        $statements[] = sprintf(
+            'SELECT setval(' . "'%s'" . ', GREATEST(COALESCE((SELECT MAX("%s") FROM "%s"), 0) + 1, %d), false)',
+            $sequence,
+            $column,
+            $table,
+            $nextValue
+        );
+    }
+
+    return $statements;
+}
+
 function extractCreateStatements(string $dump): array
 {
     preg_match_all('/CREATE TABLE\s+`[^`]+`\s*\((.*?)\)\s*ENGINE=.*?;/is', $dump, $matches);
@@ -148,8 +178,47 @@ function extractCreateStatements(string $dump): array
 
 function extractInsertStatements(string $dump): array
 {
-    preg_match_all('/INSERT INTO\s+`[^`]+`\s*\([^)]+\)\s+VALUES\s+.*?;/is', $dump, $matches);
-    return $matches[0] ?? [];
+    $inserts = [];
+    foreach (splitDumpStatements($dump) as $statement) {
+        if (preg_match('/INSERT INTO\s+`[^`]+`/i', $statement, $match, PREG_OFFSET_CAPTURE)) {
+            $inserts[] = substr($statement, $match[0][1]);
+        }
+    }
+
+    return $inserts;
+}
+
+function splitDumpStatements(string $dump): array
+{
+    $statements = [];
+    $current = '';
+    $inString = false;
+    $length = strlen($dump);
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $dump[$i];
+        $current .= $char;
+
+        if ($char === "'" && ($i === 0 || $dump[$i - 1] !== '\\')) {
+            $inString = !$inString;
+            continue;
+        }
+
+        if ($char === ';' && !$inString) {
+            $trimmed = trim($current);
+            if ($trimmed !== '') {
+                $statements[] = $trimmed;
+            }
+            $current = '';
+        }
+    }
+
+    $trimmed = trim($current);
+    if ($trimmed !== '') {
+        $statements[] = $trimmed;
+    }
+
+    return $statements;
 }
 
 function convertCreateTable(string $statement): string
@@ -231,6 +300,7 @@ function convertColumnDefinition(string $definition): string
 
 function convertInsert(string $statement): string
 {
+    $statement = rtrim(trim($statement), ';');
     $statement = str_replace('`', '"', $statement);
     $statement = preg_replace('/\\bNULL\\b/i', 'NULL', $statement);
 

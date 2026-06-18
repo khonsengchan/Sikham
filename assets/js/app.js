@@ -1,5 +1,5 @@
 // app.js - Main SPA Router with Role-Based Access Control
-const BASE = '/primary_shools';
+const BASE = window.location.pathname.startsWith('/primary_shools') ? '/primary_shools' : '';
 const API = `${BASE}/api`;
 const APP_VER = '2026-06-12-6'; // Bumped for dashboard finance table scroll
 
